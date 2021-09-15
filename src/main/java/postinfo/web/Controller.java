@@ -31,6 +31,7 @@ public class Controller {
             posts.remove(0);
             jdbcRepository.addPosts(posts);
         }
+        deleteOldPosts();
     }
 
     @PostMapping(value = "/delete", consumes = "application/json;charset=UTF-8")
@@ -44,5 +45,10 @@ public class Controller {
     @GetMapping("deleteOldPosts")
     public void deleteOldPosts() {
         jdbcRepository.deleteOldPosts();
+    }
+
+    @GetMapping(value = "postsUrls", produces = "application/json")
+    public List<String> getPostsUrls() {
+        return jdbcRepository.getPostsURL();
     }
 }

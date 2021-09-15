@@ -9,4 +9,5 @@ public interface IRepository {
     void addPosts(List<Post> posts);
     void deletePosts(List<Post> posts);
     void deleteOldPosts();
+    List<String> getPostsURL();
 }

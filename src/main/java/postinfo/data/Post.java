@@ -15,9 +15,8 @@ public class Post {
     int shares;
     String page;
     String date;
-    String profileImageURL;
-    String thumbnailImageURL;
-
+    @JsonProperty("show_after")
+    String showAfter;
 
     public int getType() {
         return type;
@@ -92,24 +91,12 @@ public class Post {
         return this;
     }
 
-    public String getProfileImageURL() {
-        return profileImageURL;
+    public String getShowAfter() {
+        return showAfter;
     }
 
-    @JsonProperty("profile_img_url")
-    public Post setProfileImageURL(String profileImageURL) {
-        this.profileImageURL = profileImageURL;
-        return this;
-    }
-
-    public String getThumbnailImageURL() {
-        return thumbnailImageURL;
-    }
-
-    @JsonProperty("thumbnail_img_url")
-    public Post setThumbnailImageURL(String thumbnailImageURL) {
-        this.thumbnailImageURL = thumbnailImageURL;
-        return this;
+    public void setShowAfter(String showAfter) {
+        this.showAfter = showAfter;
     }
 
     public static Post createAuthPost(){
@@ -121,8 +108,6 @@ public class Post {
                 .setComments(2)
                 .setShares(3)
                 .setPage("page")
-                .setProfileImageURL("img")
-                .setThumbnailImageURL("thumb")
                 .setText("empty");
     }
 
@@ -138,13 +123,11 @@ public class Post {
                Objects.equals(url, post.url) &&
                Objects.equals(text, post.text) &&
                Objects.equals(page, post.page) &&
-               Objects.equals(date, post.date) &&
-               Objects.equals(profileImageURL, post.profileImageURL) &&
-               Objects.equals(thumbnailImageURL, post.thumbnailImageURL);
+               Objects.equals(date, post.date);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(type, url, text, likes, comments, shares, page, date, profileImageURL, thumbnailImageURL);
+        return Objects.hash(type, url, text, likes, comments, shares, page, date);
     }
 }

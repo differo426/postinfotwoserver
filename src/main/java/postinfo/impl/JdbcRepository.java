@@ -26,17 +26,29 @@ public class JdbcRepository implements IRepository {
 
     @Override
     public List<Post> getPosts() {
-        String sql = "SELECT * FROM posts ORDER BY date DESC";
-        return jdbcTemplate.query(sql, this::mapPostRow);
+
+        String sql = "SELECT * FROM posts WHERE show_after < ? ORDER BY time_uploaded DESC";
+        return jdbcTemplate.query(sql, this::mapPostRow, new Timestamp(System.currentTimeMillis()));
     }
 
     @Override
     public void addPosts(List<Post> posts) {
-        String sql = "REPLACE INTO posts " +
-                     "VALUES (?,?,?,?,?,?,?,?,?,?,?)";
+        String sql = "INSERT INTO posts (page, type, text, url, likes, comments, shares, date, time_uploaded, time_updated, show_after) " +
+                     "VALUES (?,?,?,?,?,?,?,?,?,?,?) " +
+                     "ON DUPLICATE KEY UPDATE " +
+                     "page = VALUES(page), " +
+                     "type = VALUES(type), " +
+                     "text = VALUES(text), " +
+                     "url = VALUES(url), " +
+                     "likes = VALUES(likes), " +
+                     "comments = VALUES(comments), " +
+                     "shares = VALUES(shares), " +
+                     "date = VALUES(date), " +
+                     "time_updated = VALUES(time_updated), " +
+                     "show_after = VALUES(show_after) ";
 
         for (Post post : posts) {
-            jdbcTemplate.update(sql, post.getPage(), post.getType(), post.getProfileImageURL(), post.getThumbnailImageURL(), new String(post.getText().getBytes(), StandardCharsets.UTF_8), post.getUrl(), post.getLikes(), post.getComments(), post.getShares(), post.getDate(), new Timestamp(System.currentTimeMillis()));
+            jdbcTemplate.update(sql, post.getPage(), post.getType(), new String(post.getText().getBytes(), StandardCharsets.UTF_8), post.getUrl(), post.getLikes(), post.getComments(), post.getShares(), post.getDate(), new Timestamp(System.currentTimeMillis()), new Timestamp(System.currentTimeMillis()), post.getShowAfter());
         }
     }
 
@@ -52,18 +64,23 @@ public class JdbcRepository implements IRepository {
     @Override
     public void deleteOldPosts() {
         int year = Calendar.getInstance().get(Calendar.YEAR);
-        String lastSupportedDate = (year - 1) + "01-01";
+        String lastSupportedDate = (year - 1) + "-01-01";
 
         String sql = "DELETE FROM posts where date < ?";
 
         jdbcTemplate.update(sql, lastSupportedDate);
     }
 
+    @Override
+    public List<String> getPostsURL() {
+        String sql = "SELECT url FROM posts";
+
+        return jdbcTemplate.queryForList(sql, String.class);
+    }
+
     private Post mapPostRow(ResultSet rs, int rowNum) throws SQLException {
         return new Post().setType(rs.getInt("type"))
                 .setPage(rs.getString("page"))
-                .setProfileImageURL(rs.getString("profile_img_url"))
-                .setThumbnailImageURL(rs.getString("thumbnail_img_url"))
                 .setText(rs.getString("text"))
                 .setUrl(rs.getString("URL"))
                 .setLikes(convert(rs.getString("likes")))
